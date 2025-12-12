@@ -8,8 +8,16 @@ namespace GeometryEngine3D
 {
     internal class Cuboid : Shape
     {
-        private double mSide;
-        public Cuboid(string name, double side) : base("Cuboid", name) { mSide = side; build(); }
+        private double mLength;
+        private double mWidth;
+        private double mHeight;
+        public Cuboid(string name, double length, double width, double height) : base("Cuboid", name)
+        {
+            mLength = length;
+            mWidth = width;
+            mHeight = height;
+            build();
+        }
         protected override void build()
         {
             double x = 0;
@@ -17,17 +25,17 @@ namespace GeometryEngine3D
             double z = 0;
 
             int p0Ind = mTriag.addPoint(new Point(x, y, z));
-            int p1Ind = mTriag.addPoint(new Point(x + mSide, y, z));
-            int p2Ind = mTriag.addPoint(new Point(x + mSide, y + mSide, z));
-            int p3Ind = mTriag.addPoint(new Point(x, y + mSide, z));
+            int p1Ind = mTriag.addPoint(new Point(x + mLength, y, z));
+            int p2Ind = mTriag.addPoint(new Point(x + mLength, y + mWidth, z));
+            int p3Ind = mTriag.addPoint(new Point(x, y + mWidth, z));
 
             mTriag.addTriangle(p0Ind, p2Ind, p1Ind); // front
             mTriag.addTriangle(p0Ind, p3Ind, p2Ind); // front
 
-            int p4Ind = mTriag.addPoint(new Point(x, y, z + mSide));
-            int p5Ind = mTriag.addPoint(new Point(x + mSide, y, z + mSide));
-            int p6Ind = mTriag.addPoint(new Point(x + mSide, y + mSide, z + mSide));
-            int p7Ind = mTriag.addPoint(new Point(x, y + mSide, z + mSide));
+            int p4Ind = mTriag.addPoint(new Point(x, y, z + mHeight));
+            int p5Ind = mTriag.addPoint(new Point(x + mLength, y, z + mHeight));
+            int p6Ind = mTriag.addPoint(new Point(x + mLength, y + mWidth, z + mHeight));
+            int p7Ind = mTriag.addPoint(new Point(x, y + mWidth, z + mHeight));
 
             mTriag.addTriangle(p4Ind, p5Ind, p6Ind); // back
             mTriag.addTriangle(p4Ind, p6Ind, p7Ind); // back

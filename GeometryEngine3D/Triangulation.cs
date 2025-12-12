@@ -36,10 +36,18 @@ namespace GeometryEngine3D
         }
         public void addTriangle(int a, int b, int c, Point normal = null)
         {
-            if(normal == null) normal = new Point();
-            Triangle t = new Triangle(a, b, c, normal);
-            mTriangles.Add(t);
-            mNormals.Add(calculateNormal(t));
+            if(normal == null)
+            {
+                Triangle t = new Triangle(a, b, c);
+                mTriangles.Add(t);
+                mNormals.Add(calculateNormal(t));
+            }
+            else
+            {
+                Triangle t = new Triangle(a, b, c, normal);
+                mTriangles.Add(t);
+                mNormals.Add(calculateNormal(t));
+            }
         }
         public List<float> getDataForOpenGl()
         {

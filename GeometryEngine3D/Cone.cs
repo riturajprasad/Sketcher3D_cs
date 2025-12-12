@@ -8,41 +8,41 @@ namespace GeometryEngine3D
 {
     internal class Cone : Shape
     {
-        private double mSide;
-        public Cone(string name, double side) : base("Cone", name) { mSide = side; build(); }
+        private double mRadius;
+        private double mHeight;
+        public Cone(string name, double radius, double height) : base("Cone", name)
+        {
+            mRadius = radius;
+            mHeight = height;
+            build();
+        }
         protected override void build()
         {
             double x = 0;
             double y = 0;
             double z = 0;
+            Point origin = new Point(x, y, z);
+            Point apex = new Point(x, y, mHeight);
 
-            int p0Ind = mTriag.addPoint(new Point(x, y, z));
-            int p1Ind = mTriag.addPoint(new Point(x + mSide, y, z));
-            int p2Ind = mTriag.addPoint(new Point(x + mSide, y + mSide, z));
-            int p3Ind = mTriag.addPoint(new Point(x, y + mSide, z));
+            List<int> bPtsIndex = new List<int>();
+            int originInd = mTriag.addPoint(origin);
+            int apexInd = mTriag.addPoint(apex);
 
-            mTriag.addTriangle(p0Ind, p2Ind, p1Ind); // front
-            mTriag.addTriangle(p0Ind, p3Ind, p2Ind); // front
+            bPtsIndex.Add(mTriag.addPoint(new Point(x + mRadius * Math.Cos(0), y + mRadius * Math.Sin(0), z)));
+            int number = 72;
+            double dTheta = 2 * Math.PI / number;
+            for (int i = 1; i <= number; i++)
+            {
+                double theta = i * dTheta;
+                double x_ = mRadius * Math.Cos(theta);
+                double y_ = mRadius * Math.Sin(theta);
 
-            int p4Ind = mTriag.addPoint(new Point(x, y, z + mSide));
-            int p5Ind = mTriag.addPoint(new Point(x + mSide, y, z + mSide));
-            int p6Ind = mTriag.addPoint(new Point(x + mSide, y + mSide, z + mSide));
-            int p7Ind = mTriag.addPoint(new Point(x, y + mSide, z + mSide));
+                bPtsIndex.Add(mTriag.addPoint( new Point(x + x_, y + y_, z)));
 
-            mTriag.addTriangle(p4Ind, p5Ind, p6Ind); // back
-            mTriag.addTriangle(p4Ind, p6Ind, p7Ind); // back
-
-            mTriag.addTriangle(p7Ind, p6Ind, p2Ind); // top
-            mTriag.addTriangle(p7Ind, p2Ind, p3Ind); // top
-
-            mTriag.addTriangle(p0Ind, p1Ind, p5Ind); // bottom
-            mTriag.addTriangle(p0Ind, p5Ind, p4Ind); // bottom
-
-            mTriag.addTriangle(p5Ind, p1Ind, p2Ind); // right
-            mTriag.addTriangle(p5Ind, p2Ind, p6Ind); // right
-
-            mTriag.addTriangle(p0Ind, p4Ind, p7Ind); // left
-            mTriag.addTriangle(p0Ind, p7Ind, p3Ind); // left
+                // each 5 degree section has 4 triangles.
+                mTriag.addTriangle(bPtsIndex[i - 1], originInd, bPtsIndex[i]);      // Base circle center, two points on it's circumference
+                mTriag.addTriangle(bPtsIndex[i - 1], bPtsIndex[i], apexInd);        // Cone surface triangle: b1, apex, b0 
+            }
         }
     }
 }

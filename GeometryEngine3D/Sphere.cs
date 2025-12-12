@@ -8,41 +8,48 @@ namespace GeometryEngine3D
 {
     internal class Sphere : Shape
     {
-        private double mSide;
-        public Sphere(string name, double side) : base("Sphere", name) { mSide = side; build(); }
+        private double mRadius;
+        public Sphere(string name, double radius) : base("Sphere", name) { mRadius = radius; build(); }
         protected override void build()
         {
             double x = 0;
             double y = 0;
             double z = 0;
+            Point  center = new Point(x, y, z);
 
-            int p0Ind = mTriag.addPoint(new Point(x, y, z));
-            int p1Ind = mTriag.addPoint(new Point(x + mSide, y, z));
-            int p2Ind = mTriag.addPoint(new Point(x + mSide, y + mSide, z));
-            int p3Ind = mTriag.addPoint(new Point(x, y + mSide, z));
+            int stacks = 36;
+            int number = 72;
 
-            mTriag.addTriangle(p0Ind, p2Ind, p1Ind); // front
-            mTriag.addTriangle(p0Ind, p3Ind, p2Ind); // front
+            for (int i = 0; i < stacks; i++)
+            {
+                double iLatitude1 = Math.PI * (-0.5 + (double)i / stacks);
+                double iLatitude2 = Math.PI * (-0.5 + (double)(i + 1) / stacks);
 
-            int p4Ind = mTriag.addPoint(new Point(x, y, z + mSide));
-            int p5Ind = mTriag.addPoint(new Point(x + mSide, y, z + mSide));
-            int p6Ind = mTriag.addPoint(new Point(x + mSide, y + mSide, z + mSide));
-            int p7Ind = mTriag.addPoint(new Point(x, y + mSide, z + mSide));
+                double z1 = mRadius * Math.Sin(iLatitude1);
+                double r1 = mRadius * Math.Cos(iLatitude1);
 
-            mTriag.addTriangle(p4Ind, p5Ind, p6Ind); // back
-            mTriag.addTriangle(p4Ind, p6Ind, p7Ind); // back
+                double z2 = mRadius * Math.Sin(iLatitude2);
+                double r2 = mRadius * Math.Cos(iLatitude2);
 
-            mTriag.addTriangle(p7Ind, p6Ind, p2Ind); // top
-            mTriag.addTriangle(p7Ind, p2Ind, p3Ind); // top
+                for (int j = 0; j < number; j++)
+                {
+                    double jLatitude1 = 2 * Math.PI * (double)j / number;
+                    double jLatitude2 = 2 * Math.PI * (double)(j + 1) / number;
 
-            mTriag.addTriangle(p0Ind, p1Ind, p5Ind); // bottom
-            mTriag.addTriangle(p0Ind, p5Ind, p4Ind); // bottom
+                    // First ring
+                    int idx1 = mTriag.addPoint(new Point(r1 * Math.Cos(jLatitude1), r1 * Math.Sin(jLatitude1), z1));
+                    int idx2 = mTriag.addPoint(new Point(r1 * Math.Cos(jLatitude2), r1 * Math.Sin(jLatitude2), z1));
 
-            mTriag.addTriangle(p5Ind, p1Ind, p2Ind); // right
-            mTriag.addTriangle(p5Ind, p2Ind, p6Ind); // right
+                    // Second ring
+                    int idx3 = mTriag.addPoint(new Point(r2 * Math.Cos(jLatitude1), r2 * Math.Sin(jLatitude1), z2));
+                    int idx4 = mTriag.addPoint(new Point(r2 * Math.Cos(jLatitude2), r2 * Math.Sin(jLatitude2), z2));
 
-            mTriag.addTriangle(p0Ind, p4Ind, p7Ind); // left
-            mTriag.addTriangle(p0Ind, p7Ind, p3Ind); // left
+                    // Triangle 1
+                    mTriag.addTriangle(idx1, idx2, idx3);
+                    // Triangle 2
+                    mTriag.addTriangle(idx2, idx4, idx3);
+                }
+            }
         }
     }
 }

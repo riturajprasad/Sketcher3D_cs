@@ -8,41 +8,48 @@ namespace GeometryEngine3D
 {
     internal class Cylinder : Shape
     {
-        private double mSide;
-        public Cylinder(string name, double side) : base("Cylinder", name) { mSide = side; build(); }
+        private double mRadius;
+        private double mHeight;
+        public Cylinder(string name, double radius, double height) : base("Cylinder", name)
+        {
+            mRadius = radius;
+            mHeight = height;
+            build();
+        }
         protected override void build()
         {
             double x = 0;
             double y = 0;
             double z = 0;
+            Point baseCenter = new Point(x, y, z);
+            Point topCenter = new Point(x, y, mHeight);
 
-            int p0Ind = mTriag.addPoint(new Point(x, y, z));
-            int p1Ind = mTriag.addPoint(new Point(x + mSide, y, z));
-            int p2Ind = mTriag.addPoint(new Point(x + mSide, y + mSide, z));
-            int p3Ind = mTriag.addPoint(new Point(x, y + mSide, z));
+            List<int> bPtsIndex = new List<int>();
+            List<int> tPtsIndex = new List<int>();
+            int baseCenterInd = mTriag.addPoint(baseCenter);
+            int topCenterInd = mTriag.addPoint(topCenter);
 
-            mTriag.addTriangle(p0Ind, p2Ind, p1Ind); // front
-            mTriag.addTriangle(p0Ind, p3Ind, p2Ind); // front
+            bPtsIndex.Add(mTriag.addPoint(new Point(x + mRadius * Math.Cos(0), y + mRadius * Math.Sin(0), z)));
+            tPtsIndex.Add(mTriag.addPoint(new Point(x + mRadius * Math.Cos(0), y + mRadius * Math.Sin(0), z + mHeight)));
 
-            int p4Ind = mTriag.addPoint(new Point(x, y, z + mSide));
-            int p5Ind = mTriag.addPoint(new Point(x + mSide, y, z + mSide));
-            int p6Ind = mTriag.addPoint(new Point(x + mSide, y + mSide, z + mSide));
-            int p7Ind = mTriag.addPoint(new Point(x, y + mSide, z + mSide));
+            int number = 72;
+            double dTheta = 2 * Math.PI / number;
 
-            mTriag.addTriangle(p4Ind, p5Ind, p6Ind); // back
-            mTriag.addTriangle(p4Ind, p6Ind, p7Ind); // back
+            for (int i = 1; i <= number; i++)
+            {
+                double theta = i * dTheta;
+                double x_ = mRadius * Math.Cos(theta);
+                double y_ = mRadius * Math.Sin(theta);
 
-            mTriag.addTriangle(p7Ind, p6Ind, p2Ind); // top
-            mTriag.addTriangle(p7Ind, p2Ind, p3Ind); // top
+                bPtsIndex.Add(mTriag.addPoint(new Point(x + x_, y + y_, z)));
+                tPtsIndex.Add(mTriag.addPoint(new Point(x + x_, y + y_, z + mHeight)));
 
-            mTriag.addTriangle(p0Ind, p1Ind, p5Ind); // bottom
-            mTriag.addTriangle(p0Ind, p5Ind, p4Ind); // bottom
-
-            mTriag.addTriangle(p5Ind, p1Ind, p2Ind); // right
-            mTriag.addTriangle(p5Ind, p2Ind, p6Ind); // right
-
-            mTriag.addTriangle(p0Ind, p4Ind, p7Ind); // left
-            mTriag.addTriangle(p0Ind, p7Ind, p3Ind); // left
+                // each 5 degree section has 4 triangles.
+                mTriag.addTriangle(bPtsIndex[i], bPtsIndex[i - 1], baseCenterInd);      // Base circle center, two points on it's circumference
+                mTriag.addTriangle(bPtsIndex[i - 1], bPtsIndex[i], tPtsIndex[i]);       // Cylinder surface triangle: b1, t1, b0 
+                mTriag.addTriangle(bPtsIndex[i - 1], tPtsIndex[i], tPtsIndex[i - 1]);   // Cylinder surface triangle: b0, t1, t0
+                mTriag.addTriangle(topCenterInd, tPtsIndex[i - 1], tPtsIndex[i]);       // Top circle center, two points on it's circumference
+            }
         }
     }
 }
