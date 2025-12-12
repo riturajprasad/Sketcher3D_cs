@@ -22,5 +22,60 @@ namespace GeometryEngine3D
 
             return index;
         }
+        private Point calculateNormal(Triangle tri)
+        {
+            Point u = mPoints[tri.m2] - mPoints[tri.m1];
+            Point v = mPoints[tri.m3] - mPoints[tri.m1];
+
+            double nx = u.getY() * v.getZ() - u.getZ() * v.getY();
+            double ny = u.getZ() * v.getX() - u.getX() * v.getZ();
+            double nz = u.getX() * v.getY() - u.getY() * v.getX();
+
+            double len = Math.Sqrt(nx * nx + ny * ny + nz * nz);
+            return new Point(nx/len, ny/len, nz/len);
+        }
+        public void addTriangle(int a, int b, int c, Point normal = null)
+        {
+            if(normal == null) normal = new Point();
+            Triangle t = new Triangle(a, b, c, normal);
+            mTriangles.Add(t);
+            mNormals.Add(calculateNormal(t));
+        }
+        public List<float> getDataForOpenGl()
+        {
+            List<float> oglData = new List<float>();
+
+            foreach (Triangle t in mTriangles)
+            {
+                oglData.Add((float)mPoints[t.m1].getX());
+                oglData.Add((float)mPoints[t.m1].getY());
+                oglData.Add((float)mPoints[t.m1].getZ());
+                                  
+                oglData.Add((float)mPoints[t.m2].getX());
+                oglData.Add((float)mPoints[t.m2].getY());
+                oglData.Add((float)mPoints[t.m2].getZ());
+                                  
+                oglData.Add((float)mPoints[t.m3].getX());
+                oglData.Add((float)mPoints[t.m3].getY());
+                oglData.Add((float)mPoints[t.m3].getZ());
+            }
+
+            return oglData;
+        }
+        public List<float> getNormalForOpenGl()
+        {
+            List<float> oglData = new List<float>();
+
+            foreach (Triangle t in mTriangles)
+            {
+                Point pt = calculateNormal(t);
+
+                oglData.Add((float)pt.getX());
+                oglData.Add((float)pt.getY());
+                oglData.Add((float)pt.getZ());
+            }
+
+            return oglData;
+        }
     }
 }

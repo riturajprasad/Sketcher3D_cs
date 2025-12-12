@@ -30,5 +30,22 @@ namespace GeometryEngine3D
         public void setX(double x) { mX = x; }
         public void setY(double y) { mY = y; }
         public void setZ(double z) { mZ = z; }
+
+        public static Point operator-(Point p2, Point p1)
+        {
+            return new Point((p2.mX - p1.mX), (p2.mY - p1.mY), (p2.mZ - p1.mZ));
+        }
+        public static bool operator<(Point p1, Point p2)
+        {
+            if (p1.mX != p2.mX) return p1.mX < p2.mX;
+            if (p1.mY != p2.mY) return p1.mY < p2.mY;
+            return p1.mZ < p2.mZ;
+        }
+        public static bool operator>(Point p1, Point p2)
+        {
+            if (p1.mX != p2.mX) return p1.mX > p2.mX;
+            if (p1.mY != p2.mY) return p1.mY > p2.mY;
+            return p1.mZ > p2.mZ;
+        }
     }
 }
