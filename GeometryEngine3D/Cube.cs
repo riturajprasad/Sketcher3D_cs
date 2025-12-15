@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GeometryEngine3D
 {
-    internal class Cube : Shape
+    public class Cube : Shape
     {
         private readonly double mSide;
         public Cube(string name, double side) : base("Cube", name) { mSide = side; build(); }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GeometryEngine3D
 {
-    internal class Cuboid : Shape
+    public class Cuboid : Shape
     {
         private readonly double mLength;
         private readonly double mWidth;

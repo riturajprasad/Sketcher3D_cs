@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GeometryEngine3D
 {
-    internal class Transformations
+    public class Transformations
     {
         public static List<Point> applyTransform(List<Point> vertices, Matrix matrix)
         {

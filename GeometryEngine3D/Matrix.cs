@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GeometryEngine3D
 {
-    internal class Matrix
+    public class Matrix
     {
         private readonly int mRows;
         private readonly int mCols;

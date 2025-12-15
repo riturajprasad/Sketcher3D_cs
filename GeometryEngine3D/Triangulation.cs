@@ -6,13 +6,16 @@ using System.Threading.Tasks;
 
 namespace GeometryEngine3D
 {
-    internal class Triangulation
+    public class Triangulation
     {
         private readonly List<Point> mPoints = new List<Point>();
         private readonly List<Point> mNormals = new List<Point>();
         private readonly List<Triangle> mTriangles = new List<Triangle>();
         private readonly Dictionary<Point, int> pointIndex = new Dictionary<Point, int>();
 
+        public List<Point> getPoints() {  return mPoints; }
+        public List<Point> getNormals() { return mNormals; }
+        public List<Triangle> getTriangles() { return mTriangles; }
         public int addPoint(Point p)
         {
             if (pointIndex.TryGetValue(p, out int existingIndex)) return existingIndex;

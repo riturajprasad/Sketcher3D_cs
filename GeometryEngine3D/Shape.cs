@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GeometryEngine3D
 {
-    abstract class Shape
+    public abstract class Shape
     {
         private readonly string mType;
         private readonly string mName;

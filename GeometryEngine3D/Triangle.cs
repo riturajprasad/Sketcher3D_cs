@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GeometryEngine3D
 {
-    internal class Triangle
+    public class Triangle
     {
         public int m1;
         public int m2;

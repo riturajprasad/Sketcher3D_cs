@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GeometryEngine3D
 {
-    internal class Cylinder : Shape
+    public class Cylinder : Shape
     {
         private readonly double mRadius;
         private readonly double mHeight;

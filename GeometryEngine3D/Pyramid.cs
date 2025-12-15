@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GeometryEngine3D
 {
-    internal class Pyramid : Shape
+    public class Pyramid : Shape
     {
         private readonly double mBaseLength;
         private readonly double mBaseWidth;

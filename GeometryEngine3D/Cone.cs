@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GeometryEngine3D
 {
-    internal class Cone : Shape
+    public class Cone : Shape
     {
         private readonly double mRadius;
         private readonly double mHeight;
