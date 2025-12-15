@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,6 +51,72 @@ namespace GeometryEngine3D
                     mTriag.addTriangle(idx2, idx4, idx3);
                 }
             }
+        }
+        public override void Save(TextWriter outw)
+        {
+            outw.WriteLine($"{getType()} {getName()} R {mRadius}");
+        }
+        public override void SaveForGnu(TextWriter outw)
+        {
+            List<List<Point>> vec = new List<List<Point>>();
+            List<Point> pts = new List<Point>();
+
+            int number = 72;
+            double dTheta = Math.PI / number;
+            double dPhi = 2 * Math.PI / number;
+            double phi = 0, theta = 0;
+
+            for (int i = 0; i <= number; i++)
+            {
+                theta = i * dTheta;
+                for (int j = 0; j <= number; j++)
+                {
+                    phi = j * dPhi;
+                    double x_ = mRadius * Math.Sin(theta) * Math.Cos(phi);
+                    double y_ = mRadius * Math.Sin(theta) * Math.Sin(phi);
+                    double z_ = mRadius * Math.Cos(theta);
+                    pts.Add(new Point(x_, y_, z_));
+                }
+                pts.Add(new Point(mRadius * Math.Sin(theta) * Math.Cos(0), mRadius * Math.Sin(theta) * Math.Sin(0), mRadius * Math.Cos(theta)));
+                vec.Add(new List<Point>(pts)); pts.Clear();
+            }
+
+            for (int i = 0; i <= number; i++)
+            {
+                theta = i * dTheta;
+                for (int j = 0; j <= number; j++)
+                {
+                    phi = j * dPhi;
+                    double x_ = mRadius * Math.Cos(theta);
+                    double y_ = mRadius * Math.Sin(theta) * Math.Cos(phi);
+                    double z_ = mRadius * Math.Sin(theta) * Math.Sin(phi);
+                    pts.Add(new Point(x_, y_, z_));
+                }
+                pts.Add(new Point(mRadius * Math.Cos(theta), mRadius * Math.Sin(theta) * Math.Cos(0), mRadius * Math.Sin(theta) * Math.Sin(0)));
+                vec.Add(new List<Point>(pts)); pts.Clear();
+            }
+
+            for (int i = 0; i <= number; i++)
+            {
+                theta = i * dTheta;
+                for (int j = 0; j <= number; j++)
+                {
+                    phi = j * dPhi;
+                    double x_ = mRadius * Math.Sin(theta) * Math.Sin(phi);
+                    double y_ = mRadius * Math.Cos(theta);
+                    double z_ = mRadius * Math.Sin(theta) * Math.Cos(phi);
+                    pts.Add(new Point(x_, y_, z_));
+                }
+                pts.Add(new Point(mRadius * Math.Sin(theta) * Math.Sin(0), mRadius * Math.Cos(theta), mRadius * Math.Sin(theta) * Math.Cos(0)));
+                vec.Add(new List<Point>(pts)); pts.Clear();
+            }
+
+            foreach (List<Point> list in vec)
+            {
+                foreach (Point p in list) p.WriteXYZ(outw);
+                outw.WriteLine(); outw.WriteLine();
+            }
+            outw.WriteLine(); outw.WriteLine();
         }
     }
 }

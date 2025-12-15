@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,6 +52,53 @@ namespace GeometryEngine3D
 
             mTriag.addTriangle(p0Ind, p4Ind, p7Ind); // left
             mTriag.addTriangle(p0Ind, p7Ind, p3Ind); // left
+        }
+        public override void Save(TextWriter outw)
+        {
+            outw.WriteLine($"{getType()} {getName()} L {mLength} W {mWidth} H {mHeight}");
+        }
+        public override void SaveForGnu(TextWriter outw)
+        {
+            List<List<Point>> vec = new List<List<Point>>();
+            List<Point> pts = new List<Point>();
+            double x = 0, y = 0, z = 0;
+
+            pts.Add(new Point(x, y, z));
+            pts.Add(new Point(x + mLength, y, z));
+            pts.Add(new Point(x + mLength, y + mWidth, z));
+            pts.Add(new Point(x, y + mWidth, z));
+            pts.Add(new Point(x, y, z));
+            vec.Add(new List<Point>(pts)); pts.Clear();
+
+            pts.Add(new Point(x, y, z + mHeight));
+            pts.Add(new Point(x + mLength, y, z + mHeight));
+            pts.Add(new Point(x + mLength, y + mWidth, z + mHeight));
+            pts.Add(new Point(x, y + mWidth, z + mHeight));
+            pts.Add(new Point(x, y, z + mHeight));
+            vec.Add(new List<Point>(pts)); pts.Clear();
+
+            pts.Add(new Point(x, y, z));
+            pts.Add(new Point(x, y, z + mHeight));
+            vec.Add(new List<Point>(pts)); pts.Clear();
+
+            pts.Add(new Point(x + mLength, y, z));
+            pts.Add(new Point(x + mLength, y, z + mHeight));
+            vec.Add(new List<Point>(pts)); pts.Clear();
+
+            pts.Add(new Point(x + mLength, y + mWidth, z));
+            pts.Add(new Point(x + mLength, y + mWidth, z + mHeight));
+            vec.Add(new List<Point>(pts)); pts.Clear();
+
+            pts.Add(new Point(x, y + mWidth, z));
+            pts.Add(new Point(x, y + mWidth, z + mHeight));
+            vec.Add(new List<Point>(pts)); pts.Clear();
+
+            foreach (List<Point> list in vec)
+            {
+                foreach (Point p in list) p.WriteXYZ(outw);
+                outw.WriteLine(); outw.WriteLine();
+            }
+            outw.WriteLine(); outw.WriteLine();
         }
     }
 }

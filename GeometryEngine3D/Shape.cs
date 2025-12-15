@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,5 +19,8 @@ namespace GeometryEngine3D
         public string getType() { return mType; }
         public string getName() { return mName; }
         public Triangulation getTriangulation() { return mTriag; }
+
+        public abstract void Save(TextWriter w);
+        public abstract void SaveForGnu(TextWriter w);
     }
 }

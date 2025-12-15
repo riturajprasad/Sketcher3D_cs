@@ -31,6 +31,8 @@ namespace GeometryEngine3D
         public void setY(double y) { mY = y; }
         public void setZ(double z) { mZ = z; }
 
+        public void WriteXYZ(System.IO.TextWriter w) => w.WriteLine($"{getX()} {getY()} {getZ()}");
+
         public static Point operator-(Point p2, Point p1)
         {
             return new Point((p2.mX - p1.mX), (p2.mY - p1.mY), (p2.mZ - p1.mZ));
