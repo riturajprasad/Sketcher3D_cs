@@ -28,33 +28,37 @@ namespace GeometryEngine3D
             }
             return transformedPts;
         }
-        public static List<float> translate(List<float> vec, double transX, double transY, double transZ)
+        private static List<Point> FloatsToPoints(List<float> vec)
         {
-            List<Point> vertices = new List<Point>();
-            for (int i = 0; i < vec.Count(); i += 3)
+            List<Point> pts = new List<Point>(vec.Count / 3);
+            for (int i = 0; i + 2 < vec.Count; i += 3)
+                pts.Add(new Point(vec[i], vec[i + 1], vec[i + 2]));
+            return pts;
+        }
+
+        private static void AppendPoints(List<float> vec, List<Point> pts)
+        {
+            for (int i = 0; i < pts.Count; i++)
             {
-                Point vecPt = new Point(vec[i], vec[i+1], vec[i+2]);
-                vertices.Add(vecPt);
+                vec.Add((float)pts[i].getX());
+                vec.Add((float)pts[i].getY());
+                vec.Add((float)pts[i].getZ());
             }
+        }
+        public static List<float> translate(List<float> vec, double transX = 0, double transY = 0, double transZ = 0)
+        {
+            List<Point> vertices = FloatsToPoints(vec);
+
             Matrix transMat = Matrix.getTranslationMatrix(transX, transY, transZ);
             List<Point> transformedPts = applyTransform(vertices, transMat);
 
-            for (int i = 0; i < transformedPts.Count(); i++)
-            {
-                vec.Add((float)transformedPts[i].getX());
-                vec.Add((float)transformedPts[i].getY());
-                vec.Add((float)transformedPts[i].getZ());
-            }
+            AppendPoints(vec, transformedPts);
             return vec;
         }
         public static List<float> scale(List<float> vec, double scaleX, double scaleY, double scaleZ)
         {
-            List<Point> vertices = new List<Point>();
-            for (int i = 0; i < vec.Count(); i += 3)
-            {
-                Point vecPt = new Point(vec[i], vec[i+1], vec[i+2]);
-                vertices.Add(vecPt);
-            }
+            List<Point> vertices = FloatsToPoints(vec);
+
             Point pivot = new Point();
             Matrix translate1 = Matrix.getTranslationMatrix(-pivot.getX(), -pivot.getY(), -pivot.getY());
             Matrix scaleMat = Matrix.getScalingMatrix(scaleX, scaleY, scaleZ);
@@ -63,22 +67,13 @@ namespace GeometryEngine3D
             Matrix transformed = translate2 * scaleMat * translate1;
             List<Point> transformedPts = applyTransform(vertices, transformed);
 
-            for (int i = 0; i < transformedPts.Count(); i++)
-            {
-                vec.Add((float)transformedPts[i].getX());
-                vec.Add((float)transformedPts[i].getY());
-                vec.Add((float)transformedPts[i].getZ());
-            }
+            AppendPoints(vec, transformedPts);
             return vec;
         }
         public static List<float> rotationX(List<float> vec, double degreeX)
         {
-            List<Point> vertices = new List<Point>();
-            for (int i = 0; i < vec.Count(); i += 3)
-            {
-                Point vecPt = new Point(vec[i], vec[i+1], vec[i+2]);
-                vertices.Add(vecPt);
-            }
+            List<Point> vertices = FloatsToPoints(vec);
+
             Point pivot = new Point();
             Matrix translate1 = Matrix.getTranslationMatrix(-pivot.getX(), -pivot.getY(), -pivot.getY());
             Matrix rotateXMat = Matrix.getRotationXMatrix(degreeX);
@@ -87,22 +82,13 @@ namespace GeometryEngine3D
             Matrix transformed = translate2 * rotateXMat * translate1;
             List<Point> transformedPts = applyTransform(vertices, transformed);
 
-            for (int i = 0; i < transformedPts.Count(); i++)
-            {
-                vec.Add((float)transformedPts[i].getX());
-                vec.Add((float)transformedPts[i].getY());
-                vec.Add((float)transformedPts[i].getZ());
-            }
+            AppendPoints(vec, transformedPts);
             return vec;
         }
         public static List<float> rotationY(List<float> vec, double degreeY)
         {
-            List<Point> vertices = new List<Point>();
-            for (int i = 0; i < vec.Count(); i += 3)
-            {
-                Point vecPt = new Point(vec[i], vec[i+1], vec[i+2]);
-                vertices.Add(vecPt);
-            }
+            List<Point> vertices = FloatsToPoints(vec);
+
             Point pivot = new Point();
             Matrix translate1 = Matrix.getTranslationMatrix(-pivot.getX(), -pivot.getY(), -pivot.getY());
             Matrix rotateYMat = Matrix.getRotationYMatrix(degreeY);
@@ -111,22 +97,13 @@ namespace GeometryEngine3D
             Matrix transformed = translate2 * rotateYMat * translate1;
             List<Point> transformedPts = applyTransform(vertices, transformed);
 
-            for (int i = 0; i < transformedPts.Count(); i++)
-            {
-                vec.Add((float)transformedPts[i].getX());
-                vec.Add((float)transformedPts[i].getY());
-                vec.Add((float)transformedPts[i].getZ());
-            }
+            AppendPoints(vec, transformedPts);
             return vec;
         }
         public static List<float> rotationZ(List<float> vec, double degreeZ)
         {
-            List<Point> vertices = new List<Point>();
-            for (int i = 0; i < vec.Count(); i += 3)
-            {
-                Point vecPt = new Point(vec[i], vec[i+1], vec[i+2]);
-                vertices.Add(vecPt);
-            }
+            List<Point> vertices = FloatsToPoints(vec);
+
             Point pivot = new Point();
             Matrix translate1 = Matrix.getTranslationMatrix(-pivot.getX(), -pivot.getY(), -pivot.getY());
             Matrix rotateZMat = Matrix.getRotationZMatrix(degreeZ);
@@ -135,12 +112,7 @@ namespace GeometryEngine3D
             Matrix transformed = translate2 * rotateZMat * translate1;
             List<Point> transformedPts = applyTransform(vertices, transformed);
 
-            for (int i = 0; i < transformedPts.Count(); i++)
-            {
-                vec.Add((float)transformedPts[i].getX());
-                vec.Add((float)transformedPts[i].getY());
-                vec.Add((float)transformedPts[i].getZ());
-            }
+            AppendPoints(vec, transformedPts);
             return vec;
         }
     }
