@@ -9,8 +9,8 @@ namespace GeometryEngine3D
 {
     abstract class Shape
     {
-        private string mType;
-        private string mName;
+        private readonly string mType;
+        private readonly string mName;
 
         protected Triangulation mTriag;
         protected abstract void build();

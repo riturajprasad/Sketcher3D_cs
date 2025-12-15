@@ -9,8 +9,8 @@ namespace GeometryEngine3D
 {
     internal class Cone : Shape
     {
-        private double mRadius;
-        private double mHeight;
+        private readonly double mRadius;
+        private readonly double mHeight;
         public Cone(string name, double radius, double height) : base("Cone", name)
         {
             mRadius = radius;

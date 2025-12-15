@@ -9,9 +9,9 @@ namespace GeometryEngine3D
 {
     internal class Pyramid : Shape
     {
-        private double mBaseLength;
-        private double mBaseWidth;
-        private double mHeight;
+        private readonly double mBaseLength;
+        private readonly double mBaseWidth;
+        private readonly double mHeight;
         public Pyramid(string name, double baseLength, double baseWidth, double height) : base("Pyramid", name)
         {
             mBaseLength = baseLength;

@@ -8,9 +8,9 @@ namespace GeometryEngine3D
 {
     internal class Matrix
     {
-        private int mRows;
-        private int mCols;
-        private double[,] mData;
+        private readonly int mRows;
+        private readonly int mCols;
+        private readonly double[,] mData;
 
         public Matrix(int rows = 4, int cols = 4)
         {

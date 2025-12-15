@@ -8,10 +8,10 @@ namespace GeometryEngine3D
 {
     internal class Triangulation
     {
-        private List<Point> mPoints = new List<Point>();
-        private List<Point> mNormals = new List<Point>();
-        private List<Triangle> mTriangles = new List<Triangle>();
-        private Dictionary<Point, int> pointIndex = new Dictionary<Point, int>();
+        private readonly List<Point> mPoints = new List<Point>();
+        private readonly List<Point> mNormals = new List<Point>();
+        private readonly List<Triangle> mTriangles = new List<Triangle>();
+        private readonly Dictionary<Point, int> pointIndex = new Dictionary<Point, int>();
 
         public int addPoint(Point p)
         {

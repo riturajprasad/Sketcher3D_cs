@@ -10,7 +10,7 @@ namespace GeometryEngine3D
 {
     internal class Cube : Shape
     {
-        private double mSide;
+        private readonly double mSide;
         public Cube(string name, double side) : base("Cube", name) { mSide = side; build(); }
         protected override void build()
         {

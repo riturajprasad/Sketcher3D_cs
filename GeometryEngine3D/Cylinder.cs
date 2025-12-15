@@ -9,8 +9,8 @@ namespace GeometryEngine3D
 {
     internal class Cylinder : Shape
     {
-        private double mRadius;
-        private double mHeight;
+        private readonly double mRadius;
+        private readonly double mHeight;
         public Cylinder(string name, double radius, double height) : base("Cylinder", name)
         {
             mRadius = radius;

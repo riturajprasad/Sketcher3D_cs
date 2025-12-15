@@ -9,7 +9,7 @@ namespace GeometryEngine3D
 {
     internal class Sphere : Shape
     {
-        private double mRadius;
+        private readonly double mRadius;
         public Sphere(string name, double radius) : base("Sphere", name) { mRadius = radius; build(); }
         protected override void build()
         {

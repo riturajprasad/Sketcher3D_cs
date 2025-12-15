@@ -9,9 +9,9 @@ namespace GeometryEngine3D
 {
     internal class Cuboid : Shape
     {
-        private double mLength;
-        private double mWidth;
-        private double mHeight;
+        private readonly double mLength;
+        private readonly double mWidth;
+        private readonly double mHeight;
         public Cuboid(string name, double length, double width, double height) : base("Cuboid", name)
         {
             mLength = length;
