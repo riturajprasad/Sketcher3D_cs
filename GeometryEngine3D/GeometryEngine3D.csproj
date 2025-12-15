@@ -51,6 +51,7 @@
     <Compile Include="Pyramid.cs" />
     <Compile Include="Shape.cs" />
     <Compile Include="Sphere.cs" />
+    <Compile Include="Transformations.cs" />
     <Compile Include="Triangle.cs" />
     <Compile Include="Triangulation.cs" />
   </ItemGroup>
