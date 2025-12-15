@@ -5,22 +5,64 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Sketcher3D"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="800">
-    <Grid>
-        <Button Content="Show Point" HorizontalAlignment="Center" Margin="0,373,0,0"
-         VerticalAlignment="Top" Height="52" Width="244" Click="Button_Click" FontWeight="Bold" FontSize="20"/>
+        xmlns:h="clr-namespace:HelixToolkit.Wpf;assembly=HelixToolkit.Wpf"
+        Title="Sketcher3D" Height="720" Width="1200">
+    <DockPanel>
+        <!-- Menu -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="Save (.skt)" Click="SaveSkt_Click"/>
+                <MenuItem Header="Save GNU (.dat)" Click="SaveGnu_Click"/>
+                <MenuItem Header="Save STL (.stl)" Click="SaveStl_Click"/>
+                <Separator/>
+                <MenuItem Header="Load STL (.stl)" Click="LoadStl_Click"/>
+                <Separator/>
+                <MenuItem Header="Clear" Click="Clear_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Transform">
+                <MenuItem Header="Translate" Click="Translate_Click"/>
+                <MenuItem Header="Scale" Click="Scale_Click"/>
+                <MenuItem Header="Rotate X" Click="RotateX_Click"/>
+                <MenuItem Header="Rotate Y" Click="RotateY_Click"/>
+                <MenuItem Header="Rotate Z" Click="RotateZ_Click"/>
+            </MenuItem>
+        </Menu>
 
-        <TextBox x:Name="txtX" HorizontalAlignment="Left" Margin="57,38,0,500"
-         Width="127" Height="46" Text="Enter X" FontSize="16" TextAlignment="Center" TextChanged="txtX_TextChanged"/>
+        <!-- Toolbar -->
+        <ToolBar DockPanel.Dock="Top">
+            <Button Content="Cuboid"   Click="Cuboid_Click"/>
+            <Button Content="Cube"     Click="Cube_Click"/>
+            <Button Content="Cylinder" Click="Cylinder_Click"/>
+            <Button Content="Cone"     Click="Cone_Click"/>
+            <Button Content="Sphere"   Click="Sphere_Click"/>
+            <Button Content="Pyramid"  Click="Pyramid_Click"/>
+        </ToolBar>
 
-        <TextBox x:Name="txtY" HorizontalAlignment="Center" Margin="0,38,0,500"
-         Width="128" Height="46" Text="Enter Y" FontSize="16" TextAlignment="Center" TextChanged="txtY_TextChanged"/>
+        <!-- 3D View -->
+        <h:HelixViewport3D Name="View3D"
+                           ShowCoordinateSystem="True"
+                           ShowViewCube="True">
+            <h:HelixViewport3D.Camera>
+                <PerspectiveCamera Position="200,200,400"
+                                   LookDirection="-200,-200,-400"
+                                   UpDirection="0,0,1"
+                                   FieldOfView="45"/>
+            </h:HelixViewport3D.Camera>
 
-        <TextBox x:Name="txtZ" HorizontalAlignment="Left" Margin="610,38,0,500"
-         Width="128" Height="46" Text="Enter Z" FontSize="16" TextAlignment="Center" TextChanged="txtZ_TextChanged"/>
+            <!-- Lights -->
+            <ModelVisual3D>
+                <ModelVisual3D.Content>
+                    <DirectionalLight Color="White" Direction="-1,-1,-2"/>
+                </ModelVisual3D.Content>
+            </ModelVisual3D>
+            <ModelVisual3D>
+                <ModelVisual3D.Content>
+                    <AmbientLight Color="#404040"/>
+                </ModelVisual3D.Content>
+            </ModelVisual3D>
 
-        <TextBox x:Name="txtOutput" HorizontalAlignment="Center" Margin="0,195,0,244"
-         Width="244" Text="Coordinates" FontSize="16" TextAlignment="Center" TextChanged="txtOutput_TextChanged"/>
-
-    </Grid>
+            <!-- Container for models -->
+            <ModelVisual3D x:Name="SceneRoot"/>
+        </h:HelixViewport3D>
+    </DockPanel>
 </Window>
