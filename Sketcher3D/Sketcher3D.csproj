@@ -228,6 +228,14 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\cone.png" />
+    <Resource Include="Resources\cube.png" />
+    <Resource Include="Resources\cuboid.png" />
+    <Resource Include="Resources\cylinder.png" />
+    <Resource Include="Resources\pyramid.png" />
+    <Resource Include="Resources\sphere.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\CommunityToolkit.Mvvm.8.3.2\build\CommunityToolkit.Mvvm.targets" Condition="Exists('..\packages\CommunityToolkit.Mvvm.8.3.2\build\CommunityToolkit.Mvvm.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

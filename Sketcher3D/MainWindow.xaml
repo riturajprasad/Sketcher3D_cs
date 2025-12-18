@@ -23,14 +23,17 @@
                 <!-- Saves geometry data to file -->
                 <MenuItem Header="Save" Click="Save_Click"/>
 
-                <!-- Clears all shapes from the viewport -->
-                <MenuItem Header="Clear" Click="Clear_Click"/>
-
                 <!-- Visual separator -->
                 <Separator/>
 
                 <!-- Exits the application -->
                 <MenuItem Header="Exit" Click="Exit_Click"/>
+
+            </MenuItem>
+            <MenuItem Header="Edit">
+                
+                <!-- Clears all shapes from the viewport -->
+                <MenuItem Header="Clear" Click="Clear_Click"/>
 
             </MenuItem>
         </Menu>
@@ -40,7 +43,10 @@
         <ToolBar DockPanel.Dock="Top">
 
             <!-- Creates a cube -->
-            <Button Content="Cube" Click="Cube_Click"/>
+            <Button Click="Cube_Click" ToolTip="Cube">
+                <Image Source="Resources/cube.png"
+               Width="24" Height="24"/>
+            </Button>
 
             <!-- Creates a cuboid -->
             <Button Content="Cuboid" Click="Cuboid_Click"/>
