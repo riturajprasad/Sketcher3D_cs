@@ -12,7 +12,7 @@ namespace GeometryEngine3D
         private readonly string mType;
         private readonly string mName;
 
-        protected Triangulation mTriag;
+        protected Triangulation mTriag = new Triangulation();
         protected abstract void build();
 
         public Shape(string type, string name) { mType = type; mName = name; }

@@ -11,7 +11,7 @@ namespace Sketcher3D
     {
         private readonly List<Shape> mShapes = new List<Shape>();
         public void AddShape(Shape s) => mShapes.Add(s);
-        public IReadOnlyList<Shape> GetShapes() => mShapes;
+        public List<Shape> GetShapes() => mShapes;
         public void Clear() => mShapes.Clear();
         public Shape GetLastShape() => mShapes.Count > 0 ? mShapes[mShapes.Count - 1] : null;
     }

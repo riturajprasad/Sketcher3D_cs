@@ -12,10 +12,10 @@ namespace Sketcher3D
     {
         public static MeshGeometry3D ToMesh(Triangulation tri)
         {
-            var mesh = new MeshGeometry3D();
-            foreach (var p in tri.getPoints())
+            MeshGeometry3D mesh = new MeshGeometry3D();
+            foreach (Point p in tri.getPoints())
                 mesh.Positions.Add(new Point3D(p.getX(), p.getY(), p.getZ()));
-            foreach (var t in tri.getTriangles())
+            foreach (Triangle t in tri.getTriangles())
             {
                 mesh.TriangleIndices.Add(t.m1);
                 mesh.TriangleIndices.Add(t.m2);

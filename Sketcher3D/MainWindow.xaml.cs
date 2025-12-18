@@ -1,69 +1,273 @@
-﻿// Engine namespaces
-using GeometryEngine3D;
-using Microsoft.Win32;
+﻿using GeometryEngine3D;          // Geometry engine (Shape, Triangulation)
+using Microsoft.Win32;                  // For Open/Save file dialogs
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using EnginePoint = GeometryEngine3D.Point;
-using EngineShape = GeometryEngine3D.Shape;
-using EngineTriangulation = GeometryEngine3D.Triangulation;
+using System.Windows;                   // Core WPF window functionality
+using System.Windows.Input;             // Mouse and keyboard input handling
+using System.Windows.Media;             // Colors, brushes, materials
+using System.Windows.Media.Media3D;     // 3D types: Camera, Mesh, Transforms
+// Alias to avoid ambiguity between WPF Point and engine Point
+using WpfPoint = System.Windows.Point;
 
 namespace Sketcher3D
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Main application window.
+    /// Responsible for:
+    /// - Rendering 3D geometry
+    /// - Handling mouse interaction (rotate, pan, zoom)
+    /// - Bridging geometry engine with WPF renderer
     /// </summary>
     public partial class MainWindow : Window
     {
+        // Manages all geometry objects (engine level)
         private readonly ShapeManager _shapeManager = new ShapeManager();
+
+        // =====================================================
+        // SCENE TRANSFORMS
+        // Applied to SceneRoot so all objects move together
+        // =====================================================
+
+        private Transform3DGroup _sceneTransform;   // Root transform group
+        private AxisAngleRotation3D _rotX;           // Rotation around X axis
+        private AxisAngleRotation3D _rotY;           // Rotation around Y axis
+        private TranslateTransform3D _pan;           // Pan (move scene in XY plane)
+
+        // =====================================================
+        // MOUSE STATE
+        // Tracks interaction mode and last mouse position
+        // =====================================================
+
+        private WpfPoint _lastPos;                   // Previous mouse position
+        private bool _rotating;                      // Left mouse button state
+        private bool _panning;                       // Right mouse button state
+
+        /// <summary>
+        /// Main window constructor.
+        /// Initializes UI and 3D scene transforms.
+        /// </summary>
         public MainWindow()
         {
-            InitializeComponent();
+            InitializeComponent();   // Load XAML UI
+            InitSceneTransforms();   // Setup rotation and pan transforms
         }
 
-        // ---------- Helpers ----------
-        private static GeometryModel3D MakeModel(MeshGeometry3D mesh, Color color)
+        // =====================================================
+        // SCENE SETUP
+        // =====================================================
+
+        /// <summary>
+        /// Initializes scene-level transforms.
+        /// All 3D objects are children of SceneRoot,
+        /// so these transforms affect the entire scene.
+        /// </summary>
+        private void InitSceneTransforms()
         {
-            var mat = new DiffuseMaterial(new SolidColorBrush(color));
-            return new GeometryModel3D(mesh, mat) { BackMaterial = mat };
+            // Rotation around X axis (pitch)
+            _rotX = new AxisAngleRotation3D(new Vector3D(1, 0, 0), 0);
+
+            // Rotation around Y axis (yaw)
+            _rotY = new AxisAngleRotation3D(new Vector3D(0, 1, 0), 0);
+
+            // Translation for panning the scene
+            _pan = new TranslateTransform3D();
+
+            // Combine all transforms into a group
+            _sceneTransform = new Transform3DGroup();
+            _sceneTransform.Children.Add(new RotateTransform3D(_rotX));
+            _sceneTransform.Children.Add(new RotateTransform3D(_rotY));
+            _sceneTransform.Children.Add(_pan);
+
+            // Apply transform group to scene root
+            SceneRoot.Transform = _sceneTransform;
         }
 
-        private void AddShapeToScene(EngineShape s, Color? color = null)
+        // =====================================================
+        // SHAPE CREATION & RENDERING
+        // =====================================================
+
+        /// <summary>
+        /// Converts a geometry-engine Shape into a WPF 3D model
+        /// and adds it to the scene.
+        /// </summary>
+        private void AddShapeToScene(Shape shape, Color color)
         {
-            var mesh = TriangulationMeshBuilder.ToMesh(s.getTriangulation());
-            SceneRoot.Children.Add(new ModelVisual3D
+            // Store shape in engine-level manager
+            _shapeManager.AddShape(shape);
+
+            // Convert triangulated geometry to WPF mesh
+            MeshGeometry3D mesh =
+                TriangulationMeshBuilder.ToMesh(
+                    shape.getTriangulation());
+
+            // Create material using specified color
+            DiffuseMaterial material =
+                new DiffuseMaterial(new SolidColorBrush(color));
+
+            // Create renderable 3D model
+            GeometryModel3D model = new GeometryModel3D(mesh, material)
             {
-                Content = MakeModel(mesh, color ?? Colors.SkyBlue)
-            });
+                // Render both front and back faces
+                BackMaterial = material
+            };
+
+            // Add model to the scene
+            SceneRoot.Children.Add(
+                new ModelVisual3D { Content = model });
         }
 
-        private void AddTriToScene(EngineTriangulation tri, Color? color = null)
+        // =====================================================
+        // MOUSE INTERACTION (ROTATE / PAN / ZOOM)
+        // =====================================================
+
+        /// <summary>
+        /// Handles mouse button press.
+        /// Left button → rotate
+        /// Right button → pan
+        /// </summary>
+        private void View_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var mesh = TriangulationMeshBuilder.ToMesh(tri);
-            SceneRoot.Children.Add(new ModelVisual3D
-            {
-                Content = MakeModel(mesh, color ?? Colors.LightGreen)
-            });
+            _lastPos = e.GetPosition(View);
+
+            if (e.LeftButton == MouseButtonState.Pressed)
+                _rotating = true;
+
+            if (e.RightButton == MouseButtonState.Pressed)
+                _panning = true;
+
+            // Capture mouse so movement continues outside viewport
+            View.CaptureMouse();
         }
+
+        /// <summary>
+        /// Handles mouse movement.
+        /// Applies rotation or panning based on mouse state.
+        /// </summary>
+        private void View_MouseMove(object sender, MouseEventArgs e)
+        {
+            // Ignore if no interaction is active
+            if (!_rotating && !_panning)
+                return;
+
+            WpfPoint pos = e.GetPosition(View);
+            Vector delta = pos - _lastPos;
+
+            // Rotate scene based on mouse movement
+            if (_rotating)
+            {
+                _rotY.Angle += delta.X * 0.5;
+                _rotX.Angle += delta.Y * 0.5;
+            }
+
+            // Pan scene based on mouse movement
+            if (_panning)
+            {
+                _pan.OffsetX += delta.X * 0.2;
+                _pan.OffsetY -= delta.Y * 0.2;
+            }
+
+            _lastPos = pos;
+        }
+
+        /// <summary>
+        /// Handles mouse button release.
+        /// Stops interaction.
+        /// </summary>
+        private void View_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            _rotating = false;
+            _panning = false;
+            View.ReleaseMouseCapture();
+        }
+
+        /// <summary>
+        /// Handles mouse wheel zoom.
+        /// Moves camera closer or farther.
+        /// </summary>
+        private void View_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            double zoom = e.Delta > 0 ? 0.9 : 1.1;
+
+            Camera.Position = new Point3D(
+                Camera.Position.X * zoom,
+                Camera.Position.Y * zoom,
+                Camera.Position.Z * zoom);
+        }
+
+        // =====================================================
+        // FILE MENU ACTIONS
+        // =====================================================
+
+        /// <summary>
+        /// Clears scene and resets transformations.
+        /// </summary>
 
         private static void Info(Window owner, string m)
             => MessageBox.Show(owner, m, "Info");
+        private void New_Click(object sender, RoutedEventArgs e)
+        {
+            SceneRoot.Children.Clear();
+            InitSceneTransforms();
+            _shapeManager.Clear();
+        }
+
+        /// <summary>
+        /// Clears all shapes from the scene.
+        /// </summary>
+        private void Clear_Click(object sender, RoutedEventArgs e)
+        {
+            SceneRoot.Children.Clear();
+            _shapeManager.Clear();
+        }
+
+        /// <summary>
+        /// Saves current geometry to a file.
+        /// Uses engine-level persistence (not UI objects).
+        /// </summary>
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new SaveFileDialog
+            {
+                Filter = "Text File (*.txt)|*.txt",
+                FileName = "scene.txt"
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                // Correct CAD approach:
+                // Save shapes, not WPF visuals
+                FileHandle.WriteSTL(
+                    dlg.FileName,
+                    _shapeManager.GetShapes());
+            }
+        }
+
+        /// <summary>
+        /// Exits the application.
+        /// </summary>
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        // =====================================================
+        // SHAPE CREATION BUTTON HANDLERS
+        // =====================================================
+
         private static void Warn(Window owner, string m)
             => MessageBox.Show(owner, m, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+        private void Cube_Click(object sender, RoutedEventArgs e)
+        {
+            double side;
+            if (!InputDialogs.AskOne("Cube", "Side", 40, out side)) return;
+            try
+            {
+                Cube s = ShapeCreator.CreateCube("Cube1", side);
+                _shapeManager.AddShape(s);
+                AddShapeToScene(s, Colors.Orange);
+            }
+            catch (Exception ex) { Warn(this, ex.Message); }
+        }
 
-        // ---------- Toolbar: create shapes ----------
         private void Cuboid_Click(object sender, RoutedEventArgs e)
         {
             double L, W, H;
@@ -76,20 +280,6 @@ namespace Sketcher3D
             }
             catch (Exception ex) { Warn(this, ex.Message); }
         }
-
-        private void Cube_Click(object sender, RoutedEventArgs e)
-        {
-            double side;
-            if (!InputDialogs.AskOne("Cube", "Side", 40, out side)) return;
-            try
-            {
-                var s = ShapeCreator.CreateCube("Cube1", side);
-                _shapeManager.AddShape(s);
-                AddShapeToScene(s, Colors.Orange);
-            }
-            catch (Exception ex) { Warn(this, ex.Message); }
-        }
-
         private void Cylinder_Click(object sender, RoutedEventArgs e)
         {
             double r, h;
@@ -102,7 +292,6 @@ namespace Sketcher3D
             }
             catch (Exception ex) { Warn(this, ex.Message); }
         }
-
         private void Cone_Click(object sender, RoutedEventArgs e)
         {
             double r, h;
@@ -115,7 +304,6 @@ namespace Sketcher3D
             }
             catch (Exception ex) { Warn(this, ex.Message); }
         }
-
         private void Sphere_Click(object sender, RoutedEventArgs e)
         {
             double r;
@@ -128,7 +316,6 @@ namespace Sketcher3D
             }
             catch (Exception ex) { Warn(this, ex.Message); }
         }
-
         private void Pyramid_Click(object sender, RoutedEventArgs e)
         {
             double L, W, H;
@@ -140,129 +327,6 @@ namespace Sketcher3D
                 AddShapeToScene(s, Colors.SlateBlue);
             }
             catch (Exception ex) { Warn(this, ex.Message); }
-        }
-
-        // ---------- File menu ----------
-        private void SaveSkt_Click(object sender, RoutedEventArgs e)
-        {
-            var dlg = new SaveFileDialog { Filter = "Sketch (*.skt)|*.skt" };
-            if (dlg.ShowDialog() != true) return;
-
-            var list = new List<EngineShape>(_shapeManager.GetShapes());
-            var ok = FileHandle.SaveToFile(dlg.FileName, list);
-            if (ok) Info(this, "Saved .skt"); else Warn(this, "Save failed");
-        }
-
-        private void SaveGnu_Click(object sender, RoutedEventArgs e)
-        {
-            var dlg = new SaveFileDialog { Filter = "GNU Plot (*.dat)|*.dat" };
-            if (dlg.ShowDialog() != true) return;
-
-            var list = new List<EngineShape>(_shapeManager.GetShapes());
-            var ok = FileHandle.SaveToFileGNUPlot(dlg.FileName, list);
-            if (ok) Info(this, "Saved .dat for GNUPlot"); else Warn(this, "Save failed");
-        }
-
-        private void SaveStl_Click(object sender, RoutedEventArgs e)
-        {
-            var dlg = new SaveFileDialog { Filter = "STL (*.stl)|*.stl" };
-            if (dlg.ShowDialog() != true) return;
-
-            var list = new List<EngineShape>(_shapeManager.GetShapes());
-            var ok = FileHandle.WriteSTL(dlg.FileName, list);
-            if (ok) Info(this, "Saved STL"); else Warn(this, "Save failed");
-        }
-
-        private void LoadStl_Click(object sender, RoutedEventArgs e)
-        {
-            var dlg = new OpenFileDialog { Filter = "STL (*.stl)|*.stl" };
-            if (dlg.ShowDialog() != true) return;
-
-            var tri = new EngineTriangulation();
-            try
-            {
-                FileHandle.ReadSTL(dlg.FileName, tri);
-                if (tri.getPoints().Count > 0)
-                {
-                    AddTriToScene(tri, Colors.LightGreen);
-                    Info(this, "STL loaded.");
-                }
-                else Warn(this, "No triangles found.");
-            }
-            catch (Exception ex) { Warn(this, "Load failed: " + ex.Message); }
-        }
-
-        private void Clear_Click(object sender, RoutedEventArgs e)
-        {
-            _shapeManager.Clear();
-            SceneRoot.Children.Clear();
-        }
-
-        // ---------- Transforms (apply to last shape, add as new mesh) ----------
-        private static EngineTriangulation FloatsToTriangulation(List<float> vec)
-        {
-            var tri = new EngineTriangulation();
-            for (int i = 0; i + 8 < vec.Count; i += 9)
-            {
-                var p1 = new EnginePoint(vec[i], vec[i + 1], vec[i + 2]);
-                var p2 = new EnginePoint(vec[i + 3], vec[i + 4], vec[i + 5]);
-                var p3 = new EnginePoint(vec[i + 6], vec[i + 7], vec[i + 8]);
-                int a = tri.addPoint(p1), b = tri.addPoint(p2), c = tri.addPoint(p3);
-                tri.addTriangle(a, b, c);
-            }
-            return tri;
-        }
-
-        private void Translate_Click(object sender, RoutedEventArgs e)
-        {
-            var s = _shapeManager.GetLastShape(); if (s == null) { Warn(this, "No shape."); return; }
-            double tx, ty, tz;
-            if (!InputDialogs.AskThree("Translate", "X", 0, "Y", 0, "Z", 0, out tx, out ty, out tz)) return;
-
-            var vec = s.getTriangulation().getDataForOpenGl();
-            var tvec = Transformations.translate(vec, tx, ty, tz);
-            AddTriToScene(FloatsToTriangulation(tvec), Colors.LightSteelBlue);
-        }
-
-        private void Scale_Click(object sender, RoutedEventArgs e)
-        {
-            var s = _shapeManager.GetLastShape(); if (s == null) { Warn(this, "No shape."); return; }
-            double sx, sy, sz;
-            if (!InputDialogs.AskThree("Scale", "X", 1, "Y", 1, "Z", 1, out sx, out sy, out sz)) return;
-
-            var vec = s.getTriangulation().getDataForOpenGl();
-            var tvec = Transformations.scale(vec, sx, sy, sz);
-            AddTriToScene(FloatsToTriangulation(tvec), Colors.LightSteelBlue);
-        }
-
-        private void RotateX_Click(object sender, RoutedEventArgs e)
-        {
-            var s = _shapeManager.GetLastShape(); if (s == null) { Warn(this, "No shape."); return; }
-            double deg; if (!InputDialogs.AskOne("Rotate X", "Degrees", 0, out deg)) return;
-
-            var vec = s.getTriangulation().getDataForOpenGl();
-            var tvec = Transformations.rotationX(vec, deg);
-            AddTriToScene(FloatsToTriangulation(tvec), Colors.LightSteelBlue);
-        }
-
-        private void RotateY_Click(object sender, RoutedEventArgs e)
-        {
-            var s = _shapeManager.GetLastShape(); if (s == null) { Warn(this, "No shape."); return; }
-            double deg; if (!InputDialogs.AskOne("Rotate Y", "Degrees", 0, out deg)) return;
-
-            var vec = s.getTriangulation().getDataForOpenGl();
-            var tvec = Transformations.rotationY(vec, deg);
-            AddTriToScene(FloatsToTriangulation(tvec), Colors.LightSteelBlue);
-        }
-
-        private void RotateZ_Click(object sender, RoutedEventArgs e)
-        {
-            var s = _shapeManager.GetLastShape(); if (s == null) { Warn(this, "No shape."); return; }
-            double deg; if (!InputDialogs.AskOne("Rotate Z", "Degrees", 0, out deg)) return;
-
-            var vec = s.getTriangulation().getDataForOpenGl();
-            var tvec = Transformations.rotationZ(vec, deg);
-            AddTriToScene(FloatsToTriangulation(tvec), Colors.LightSteelBlue);
         }
     }
 }
